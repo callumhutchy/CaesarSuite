@@ -10,7 +10,10 @@ namespace Caesar
     public class DiagPresentation
     {
         public string Qualifier;
+
         public int Description_CTF;
+        public string Description_CTF_String;
+
         public int ScaleTableOffset;
         public int ScaleCountMaybe;
         public int Unk5;
@@ -24,13 +27,20 @@ namespace Caesar
         public int UnkD;
         public int UnkE;
         public int UnkF;
+
         public int DisplayedUnit_CTF;
+        public string DisplayedUnit_CTF_String;
+
         public int Unk11;
         public int Unk12;
         public int EnumMaxValue;
+        public string EnumMaxValue_String;
         public int Unk14;
         public int Unk15;
+
         public int Description2_CTF;
+        public string Description2_CTF_String;
+
         public int Unk17;
         public int Unk18;
         public int Unk19;
@@ -96,6 +106,8 @@ namespace Caesar
             Qualifier = CaesarReader.ReadBitflagStringWithReader(ref bitflags, reader, BaseAddress);
 
             Description_CTF = CaesarReader.ReadBitflagInt32(ref bitflags, reader, -1);
+            Description_CTF_String = language.GetString(Description_CTF);
+
             ScaleTableOffset = CaesarReader.ReadBitflagInt32(ref bitflags, reader, -1);
             ScaleCountMaybe = CaesarReader.ReadBitflagInt32(ref bitflags, reader);
 
@@ -113,14 +125,17 @@ namespace Caesar
             UnkE = CaesarReader.ReadBitflagInt16(ref bitflags, reader);
             UnkF = CaesarReader.ReadBitflagInt16(ref bitflags, reader);
             DisplayedUnit_CTF = CaesarReader.ReadBitflagInt32(ref bitflags, reader, -1);
+            DisplayedUnit_CTF_String = language.GetString(DisplayedUnit_CTF);
 
             Unk11 = CaesarReader.ReadBitflagInt32(ref bitflags, reader);
             Unk12 = CaesarReader.ReadBitflagInt32(ref bitflags, reader);
             EnumMaxValue = CaesarReader.ReadBitflagInt32(ref bitflags, reader);
+            EnumMaxValue_String = language.GetString(EnumMaxValue);
             Unk14 = CaesarReader.ReadBitflagInt32(ref bitflags, reader, -1);
 
             Unk15 = CaesarReader.ReadBitflagInt32(ref bitflags, reader);
             Description2_CTF = CaesarReader.ReadBitflagInt32(ref bitflags, reader, -1);
+            Description2_CTF_String = language.GetString(Description2_CTF);
             Unk17 = CaesarReader.ReadBitflagInt32(ref bitflags, reader, -1);
             Unk18 = CaesarReader.ReadBitflagInt32(ref bitflags, reader);
 

@@ -24,24 +24,60 @@ namespace Caesar
         // see : const char *__cdecl DIGetComfortErrorCode(DI_ECUINFO *ecuh, unsigned int dtcIndex)
         public string Qualifier;
 
+
+        [Newtonsoft.Json.JsonIgnore]
         public int Description_CTF;
+
+
+        [Newtonsoft.Json.JsonIgnore]
         public int Reference_CTF;
 
+
+        [Newtonsoft.Json.JsonIgnore]
         public int XrefStart = -1;
+
+        [Newtonsoft.Json.JsonIgnore]
         public int XrefCount = -1;
 
         private long BaseAddress;
+
+
+        [Newtonsoft.Json.JsonIgnore]
         public int PoolIndex;
+
+        Dictionary<string, string> troubleCodeDict = new Dictionary<string, string>()
+        {
+            {"P0", "0" },
+            {"P1", "1" },
+            {"P2", "2" },
+            {"P3", "3" },
+            {"C0", "4" },
+            {"C1", "5" },
+            {"C2", "6" },
+            {"C3", "7" },
+            {"B0", "8" },
+            {"B1", "9" },
+            {"B2", "A" },
+            {"B3", "B" },
+            {"U0", "C" },
+            {"U1", "D" },
+            {"U2", "E" },
+            {"U3", "F" }
+        };
+
+        public string troubleCode;
 
         [Newtonsoft.Json.JsonIgnore]
         public ECU ParentECU;
-        [Newtonsoft.Json.JsonIgnore]
-        CTFLanguage Language;
+
 
         [Newtonsoft.Json.JsonIgnore]
+        public CTFLanguage Language;
+
         public string Description { get { return Language.GetString(Description_CTF); } }
+        public string Reference { get { return Language.GetString(Reference_CTF); } }
 
-        public void Restore(CTFLanguage language, ECU parentEcu) 
+        public void Restore(CTFLanguage language, ECU parentEcu)
         {
             ParentECU = parentEcu;
             Language = language;
@@ -61,10 +97,15 @@ namespace Caesar
 
             Qualifier = CaesarReader.ReadBitflagStringWithReader(ref bitflags, reader, baseAddress);
 
+            if (Qualifier.Length > 4 && Char.IsLetter(Qualifier[0]))
+                troubleCode = "0x" + troubleCodeDict[Qualifier.Substring(0, 2)] + Qualifier.Substring(2);
+            else
+                troubleCode = "0x" + Qualifier;
+
             Description_CTF = CaesarReader.ReadBitflagInt32(ref bitflags, reader, -1);
             Reference_CTF = CaesarReader.ReadBitflagInt32(ref bitflags, reader, -1);
 #if DEBUG
-            if (bitflags > 0) 
+            if (bitflags > 0)
             {
                 Console.WriteLine($"DTC {Qualifier} has additional unparsed fields : 0x{bitflags:X}");
             }
@@ -87,7 +128,7 @@ namespace Caesar
             }
             return null;
         }
-        public void PrintDebug() 
+        public void PrintDebug()
         {
             Console.WriteLine($"DTC: {Qualifier}: {Language.GetString(Description_CTF)} : {Language.GetString(Reference_CTF)}");
         }

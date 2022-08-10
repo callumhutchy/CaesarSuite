@@ -28,6 +28,7 @@ namespace Caesar
         public int OffsetUS;
 
         public int EnumDescription;
+        public string EnumDescriptionString;
         public int UnkC;
 
         [Newtonsoft.Json.JsonIgnore]
@@ -65,6 +66,7 @@ namespace Caesar
             OffsetUS = CaesarReader.ReadBitflagInt32(ref bitflags, reader);
 
             EnumDescription = CaesarReader.ReadBitflagInt32(ref bitflags, reader, -1);
+            EnumDescriptionString = language.GetString(EnumDescription);
             UnkC = CaesarReader.ReadBitflagInt32(ref bitflags, reader);
 
         }

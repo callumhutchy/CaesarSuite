@@ -38,29 +38,34 @@ namespace Caesar
         public string NegativeResponseName;
         public int UnkByte;
 
+
+        [Newtonsoft.Json.JsonIgnore]
         public List<int> VCDomainPoolOffsets = new List<int>();
+
+        [Newtonsoft.Json.JsonIgnore]
         public List<int> DiagServicesPoolOffsets = new List<int>();
+
+        [Newtonsoft.Json.JsonIgnore]
         public List<Tuple<int, int, int>> DTCsPoolOffsetsWithBounds = new List<Tuple<int, int, int>>();
+
+        [Newtonsoft.Json.JsonIgnore]
         public List<int> EnvironmentContextsPoolOffsets = new List<int>();
 
         public List<ECUVariantPattern> VariantPatterns = new List<ECUVariantPattern>();
+
+        [Newtonsoft.Json.JsonIgnore]
         public int[] Xrefs = new int[] { };
 
         // these should be manually deserialized by creating references back to the parent ECU
 
-        [Newtonsoft.Json.JsonIgnore]
         public List<VCDomain> VCDomains = new List<VCDomain>();
-        [Newtonsoft.Json.JsonIgnore]
         public DiagService[] DiagServices = new DiagService[] { };
-        [Newtonsoft.Json.JsonIgnore]
         public DTC[] DTCs = new DTC[] { };
-        [Newtonsoft.Json.JsonIgnore]
         public DiagService[] EnvironmentContexts = new DiagService[] { };
 
         public long BaseAddress;
         [Newtonsoft.Json.JsonIgnore]
         public ECU ParentECU;
-
         [Newtonsoft.Json.JsonIgnore]
         private CTFLanguage Language;
 

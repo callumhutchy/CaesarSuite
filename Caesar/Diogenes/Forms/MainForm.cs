@@ -12,6 +12,7 @@ using System.IO;
 using Diogenes.Properties;
 using System.Runtime.InteropServices;
 using Diogenes.SecurityAccess;
+using System.Security.Cryptography;
 
 namespace Diogenes
 {
@@ -62,7 +63,7 @@ namespace Diogenes
             LoadTree();
         }
 
-        private void PostInitDebug(CaesarContainer cbfContainer) 
+        private void PostInitDebug(CaesarContainer cbfContainer)
         {
         }
 
@@ -288,18 +289,18 @@ namespace Diogenes
                         ecuVariantNode.Tag = nameof(ECUVariant);
 
                         // check if variant should be filtered
-                        if (Connection?.VariantIsAvailable ?? false) 
+                        if (Connection?.VariantIsAvailable ?? false)
                         {
                             bool foundCorrectVariant = false;
-                            foreach (ECUVariantPattern pattern in variant.VariantPatterns) 
+                            foreach (ECUVariantPattern pattern in variant.VariantPatterns)
                             {
-                                if (pattern.VariantID == Connection.ECUVariantID) 
+                                if (pattern.VariantID == Connection.ECUVariantID)
                                 {
                                     foundCorrectVariant = true;
                                     break;
                                 }
                             }
-                            if (!foundCorrectVariant) 
+                            if (!foundCorrectVariant)
                             {
                                 continue;
                             }
@@ -475,7 +476,7 @@ namespace Diogenes
         }
 
 
-        private void treeViewSelectVariantCoding(TreeNode node) 
+        private void treeViewSelectVariantCoding(TreeNode node)
         {
             string domainName = node.Text;
             string variantName = node.Parent.Text;
@@ -536,7 +537,7 @@ namespace Diogenes
                                 connectionToolStripMenuItem.ShowDropDown();
                                 j2534InterfacesToolStripMenuItem.ShowDropDown();
                             }
-                            else 
+                            else
                             {
                                 // uhoh
                                 Console.WriteLine($"ECU connection was unsuccessful : {response}");
@@ -558,7 +559,7 @@ namespace Diogenes
                     variantName = node.Parent.Text;
                     ecuName = node.Parent.Parent.Text;
                 }
-                else 
+                else
                 {
                     ecuName = node.Parent.Text;
                 }
@@ -580,7 +581,7 @@ namespace Diogenes
                             //Console.WriteLine($"Starting Diagnostic Service picker modal for root {ecuName}");
                             picker = new PickDiagForm(ecu.GlobalDiagServices.ToArray());
                         }
-                        if (picker.ShowDialog() == DialogResult.OK) 
+                        if (picker.ShowDialog() == DialogResult.OK)
                         {
                             PresentRunDiagDialog(picker.SelectedDiagService);
                         }
@@ -594,14 +595,14 @@ namespace Diogenes
 
         private void ProtocolPostConnect()
         {
-            if (Connection.ConnectionProtocol != null) 
+            if (Connection.ConnectionProtocol != null)
             {
                 Connection.ConnectionProtocol.ConnectionEstablishedHandler(Connection);
                 LoadTree();
             }
         }
 
-        private void ShowAbout() 
+        private void ShowAbout()
         {
             AboutForm about = new AboutForm($"Diogenes {GetVersion()} (Caesar {CaesarContainer.GetCaesarVersionString()})");
             about.ShowDialog();
@@ -635,7 +636,7 @@ namespace Diogenes
             ofd.Title = "Select a CBF File";
             ofd.Filter = "CBF files (*.cbf)|*.cbf|All files (*.*)|*.*";
             ofd.Multiselect = false;
-            if (ofd.ShowDialog() == DialogResult.OK) 
+            if (ofd.ShowDialog() == DialogResult.OK)
             {
                 TryLoadFile(ofd.FileName);
             }
@@ -649,7 +650,7 @@ namespace Diogenes
                 Containers.Add(new CaesarContainer(fileBytes));
                 LoadTree();
             }
-            else 
+            else
             {
                 Console.WriteLine($"File {Path.GetFileName(fileName)} was not loaded as the checksum is invalid");
             }
@@ -673,7 +674,7 @@ namespace Diogenes
                         Console.WriteLine($"Authentication: Selected level {slForm.RequestedSecurityLevel} : {BitUtility.BytesToHex(slForm.KeyResponse)}");
                     }
                 }
-                else 
+                else
                 {
                     MessageBox.Show("The selected DLL is not capable of configuring ECU security levels. Please try another file.", "Security Level Configuration");
                 }
@@ -691,7 +692,7 @@ namespace Diogenes
             ToolStripItem defaultItem = j2534InterfacesToolStripMenuItem.DropDownItems.Add("(No devices found)");
             defaultItem.Enabled = false;
 
-            foreach (Tuple<string,string> device in ECUConnection.GetAvailableJ2534NamesAndDrivers()) 
+            foreach (Tuple<string, string> device in ECUConnection.GetAvailableJ2534NamesAndDrivers())
             {
                 defaultItem.Visible = false;
                 ToolStripItem newItem = j2534InterfacesToolStripMenuItem.DropDownItems.Add(device.Item1);
@@ -703,7 +704,7 @@ namespace Diogenes
         private void J2534InterfaceItem_Click(object sender, EventArgs e)
         {
             ToolStripItem caller = (ToolStripItem)sender;
-            if (Connection != null) 
+            if (Connection != null)
             {
                 Connection.TryCleanup();
             }
@@ -719,7 +720,7 @@ namespace Diogenes
             SetDisconnectedState();
         }
 
-        private void SetDisconnectedState(bool refresh = true) 
+        private void SetDisconnectedState(bool refresh = true)
         {
             // disconnected really means "running in simulation mode"
             if (Connection != null)
@@ -728,7 +729,7 @@ namespace Diogenes
             }
             Connection = new ECUConnection();
             Connection.ConnectionStateChangeEvent += ConnectionStateChangedHandler;
-            if (refresh) 
+            if (refresh)
             {
                 LoadTree();
             }
@@ -742,7 +743,7 @@ namespace Diogenes
 
         private void txtJ2534Input_KeyDown(object sender, KeyEventArgs e)
         {
-            if (e.KeyCode == Keys.Enter) 
+            if (e.KeyCode == Keys.Enter)
             {
                 e.Handled = true;
                 string inText = txtJ2534Input.Text;
@@ -753,7 +754,7 @@ namespace Diogenes
                     byte[] response = Connection.SendMessage(requestData);
                     Console.WriteLine($"ECU:  {BitUtility.BytesToHex(response, true)}");
                 }
-                else 
+                else
                 {
                     Console.WriteLine($"Could not understand provided hex input: '{inText}'");
                 }
@@ -772,7 +773,7 @@ namespace Diogenes
                 {
                     CaesarFlashContainer.ExportCFFMemorySegments(ofd.FileName);
                 }
-                catch (Exception ex) 
+                catch (Exception ex)
                 {
                     Console.WriteLine($"CFF Export failed: {ex.Message}");
                 }
@@ -830,9 +831,9 @@ namespace Diogenes
                     tmrBlinkConnectionMenu.Enabled = false;
                 }
             }
-            else 
+            else
             {
-                if (ConnectionMenuBlinksRemaining > 0) 
+                if (ConnectionMenuBlinksRemaining > 0)
                 {
                     connectionToolStripMenuItem.ForeColor = SystemColors.Control;
                 }
@@ -840,7 +841,7 @@ namespace Diogenes
         }
 
         private int ConnectionMenuBlinksRemaining = 0;
-        private void BlinkConnectionMenu() 
+        private void BlinkConnectionMenu()
         {
             ConnectionMenuBlinksRemaining = 8;
             tmrBlinkConnectionMenu.Enabled = true;
@@ -875,7 +876,7 @@ namespace Diogenes
                 MessageBox.Show($"Only UDS targets are officially supported (current protocol: {protocolName}). \r\n\r\n" +
                     $"The editor will still open, however please ensure that the ECU accepts UDS-like read and write commands");
             }
-            UDSHexEditor editor = new UDSHexEditor(Connection); 
+            UDSHexEditor editor = new UDSHexEditor(Connection);
             editor.ShowDialog();
         }
 
@@ -1026,7 +1027,7 @@ namespace Diogenes
             }
         }
 
-        private CaesarContainer PickContainer() 
+        private CaesarContainer PickContainer()
         {
             if (Containers.Count == 0)
             {
@@ -1130,10 +1131,10 @@ namespace Diogenes
             {
                 foreach (ECU ecu in container.CaesarECUs)
                 {
-                    foreach (DiagPresentation pres in ecu.GlobalPresentations) 
+                    foreach (DiagPresentation pres in ecu.GlobalPresentations)
                     {
                         Console.WriteLine($"Pres : {pres.Qualifier} : {pres.GetDataType()}");
-                        if (pres.InternalDataType == 8) 
+                        if (pres.InternalDataType == 8)
                         {
                             throw new NotImplementedException("found a iee754 float!");
                         }
@@ -1141,34 +1142,34 @@ namespace Diogenes
                 }
             }
             return;
-            foreach (CaesarContainer container in Containers) 
+            foreach (CaesarContainer container in Containers)
             {
-                foreach (ECU ecu in container.CaesarECUs) 
+                foreach (ECU ecu in container.CaesarECUs)
                 {
-                    foreach (DiagService ds in ecu.GlobalDiagServices) 
+                    foreach (DiagService ds in ecu.GlobalDiagServices)
                     {
-                        if (ds.Qualifier != "DT_Istgang") 
+                        if (ds.Qualifier != "DT_Istgang")
                         {
                             //continue;
                         }
-                        foreach (List<DiagPreparation> dpl in ds.OutputPreparations) 
+                        foreach (List<DiagPreparation> dpl in ds.OutputPreparations)
                         {
-                            foreach (DiagPreparation prep in dpl) 
+                            foreach (DiagPreparation prep in dpl)
                             {
                                 DiagPresentation pres = ecu.GlobalPresentations[prep.PresPoolIndex];
-                                if (pres.EnumMaxValue == 0) 
+                                if (pres.EnumMaxValue == 0)
                                 {
                                     continue;
                                 }
-                                foreach (Scale scale in pres.Scales) 
+                                foreach (Scale scale in pres.Scales)
                                 {
-                                    if (scale.EnumUpBound >= 0) 
+                                    if (scale.EnumUpBound >= 0)
                                     {
                                         string presOut = pres.InterpretData(BitUtility.BytesFromHex("0B0B0B0B0B0B0B0B0B0B0B0B0B0B0B0B0B0B0B0B0B0B0B0B0B0B0B0B0B0B0B0B0B0B0B0B0B0B0B0B"), prep);
                                         Console.WriteLine($"{ds.Qualifier} : {prep.Qualifier} @ {presOut} = {pres.InternalDataType}, {pres.EnumMaxValue}");
                                     }
                                 }
-                                if (pres.Qualifier == "PRES_ZIELGANG") 
+                                if (pres.Qualifier == "PRES_ZIELGANG")
                                 {
                                     pres.PrintDebug();
                                 }
@@ -1189,11 +1190,11 @@ namespace Diogenes
             }
             else
             {
-                foreach (ECU ecu in targetContainer.CaesarECUs) 
+                foreach (ECU ecu in targetContainer.CaesarECUs)
                 {
-                    foreach (ECUVariant variant in ecu.ECUVariants) 
+                    foreach (ECUVariant variant in ecu.ECUVariants)
                     {
-                        foreach (ECUVariantPattern pattern in variant.VariantPatterns) 
+                        foreach (ECUVariantPattern pattern in variant.VariantPatterns)
                         {
                             Console.WriteLine($"{variant.Qualifier}: {pattern.VariantID:X4}");
                         }
@@ -1211,6 +1212,50 @@ namespace Diogenes
             }
             BlockDownload blockDownload = new BlockDownload(Connection);
             blockDownload.ShowDialog();
+        }
+
+        private void massExportCBFsToJsonToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            OpenFileDialog openFileDialog = new OpenFileDialog();
+            openFileDialog.Filter = "CBFs (*.cbf)|*.cbf";
+            openFileDialog.Multiselect = true;
+            openFileDialog.Title = "Select cbf files to export";
+            DialogResult dr = openFileDialog.ShowDialog();
+            if (dr.Equals(System.Windows.Forms.DialogResult.OK))
+            {
+                List<string> files = openFileDialog.FileNames.ToList();
+                FolderBrowserDialog fbd = new FolderBrowserDialog();
+                dr = fbd.ShowDialog();
+                if (dr.Equals(System.Windows.Forms.DialogResult.OK))
+                {
+                    string outputFolder = fbd.SelectedPath;
+
+                    ProgressBar progressBar = new ProgressBar();
+                    progressBar.Maximum = files.Count;
+                    progressBar.Value = 0;
+                    progressBar.Show();
+                    for (int i = 0; i < files.Count; i++)
+                    {
+                        try
+                        {
+                            TryLoadFile(files[i]);
+                            CaesarContainer targetContainer = PickContainer();
+                            if (targetContainer is null)
+                            {
+                                Console.WriteLine("Internal error: target container is null");
+                            }
+                            else
+                            {
+                                File.WriteAllBytes(outputFolder + "\\" + targetContainer.CaesarECUs[0].Qualifier + ".json", Encoding.UTF8.GetBytes(CaesarContainer.SerializeContainer(targetContainer)));
+                            }
+                            Containers.Clear();
+                        }
+                        catch { }
+                        progressBar.Value++;
+                    }
+
+                }
+            }
         }
     }
 }

@@ -87,12 +87,12 @@ namespace Diogenes
             List<DiagPreparation> prefilledValues = new List<DiagPreparation>();
             foreach (DiagPreparation prep in preparationsToProcess)
             {
-                if (prep.Dump.Length > 0)
+                if (prep.DumpHex.Length > 0)
                 {
                     prefilledValues.Add(prep);
                     if (prep.FieldType == DiagPreparation.InferredDataType.IntegerType)
                     {
-                        byte[] fixedDump = prep.Dump.Take(prep.SizeInBits / 8).Reverse().ToArray();
+                        byte[] fixedDump = BitUtility.BytesFromHex(prep.DumpHex).Take(prep.SizeInBits / 8).Reverse().ToArray();
                         Array.ConstrainedCopy(vcParameter, 0, writeCommand, vcPrepBytePosition, vcParameter.Length);
                     }
                     else

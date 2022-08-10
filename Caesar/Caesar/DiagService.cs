@@ -70,6 +70,8 @@ namespace Caesar
         private int RequestBytes_Count;
         private int RequestBytes_Offset;
 
+        public string RequestBytes_String;
+
         private int W_OutPres_Count;
         private int W_OutPres_Offset;
 
@@ -214,6 +216,7 @@ namespace Caesar
             {
                 reader.BaseStream.Seek(baseAddress + RequestBytes_Offset, SeekOrigin.Begin);
                 RequestBytes = reader.ReadBytes(RequestBytes_Count);
+                RequestBytes_String = BitUtility.BytesToHex(RequestBytes, true);
             }
             else 
             {

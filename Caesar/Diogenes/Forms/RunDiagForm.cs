@@ -47,9 +47,9 @@ namespace Diogenes
                 if (prep.FieldType == DiagPreparation.InferredDataType.IntegerType)
                 {
                     int byteSize = prep.SizeInBits / 8;
-                    if (prep.Dump.Length > byteSize) 
+                    if (prep.DumpHex.Length > byteSize) 
                     {
-                        prep.Dump = prep.Dump.Take(byteSize).ToArray();
+                        prep.DumpHex = prep.DumpHex.Substring(0,byteSize*2);
                     }
                 }
             }
@@ -102,7 +102,8 @@ namespace Diogenes
                         prep.ModeConfig.ToString("X"),
                         prep.FieldType.ToString(),
                         "Input",
-                        BitUtility.BytesToHex(prep.Dump, true),
+                        prep.DumpHex,
+                        prep.DumpDec
                 });
                 listUniqueIndex++;
             }
@@ -122,7 +123,8 @@ namespace Diogenes
                         prep.ModeConfig.ToString("X"),
                         prep.FieldType.ToString(),
                         $"Output ({i})",
-                        BitUtility.BytesToHex(prep.Dump, true),
+                        prep.DumpHex,
+                        prep.DumpDec
                     });
                     listUniqueIndex++;
                 }

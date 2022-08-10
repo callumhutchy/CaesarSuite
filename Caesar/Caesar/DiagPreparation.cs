@@ -21,7 +21,8 @@ namespace Caesar
         public int SystemParam;
         public int DumpMode;
         private int DumpSize;
-        public byte[] Dump;
+        public string DumpDec;
+        public string DumpHex;
 
         public int BitPosition;
         public ushort ModeConfig;
@@ -38,7 +39,7 @@ namespace Caesar
 
         public InferredDataType FieldType;
 
-        public enum InferredDataType 
+        public enum InferredDataType
         {
             UnassignedType,
             IntegerType,
@@ -51,7 +52,7 @@ namespace Caesar
             ExtendedBitDumpType,
         }
 
-        public void Restore(CTFLanguage language, ECU parentEcu, DiagService parentDiagService) 
+        public void Restore(CTFLanguage language, ECU parentEcu, DiagService parentDiagService)
         {
             Language = language;
             ParentECU = parentEcu;
@@ -88,20 +89,36 @@ namespace Caesar
             SystemParam = CaesarReader.ReadBitflagInt16(ref bitflags, reader, -1);
             DumpMode = CaesarReader.ReadBitflagInt16(ref bitflags, reader);
             DumpSize = CaesarReader.ReadBitflagInt32(ref bitflags, reader);
-            if (DumpMode == 5) 
+            if (DumpSize > 0)
             {
-                // dump is actually a string, use
-                // CaesarReader.ReadBitflagDumpWithReaderAsString
-            }
-            Dump = CaesarReader.ReadBitflagDumpWithReader(ref bitflags, reader, DumpSize, baseAddress);
+                if (DumpMode == 5)
+                {
+                    // dump is actually a string, use
+                    DumpDec = CaesarReader.ReadBitflagDumpWithReaderAsString(ref bitflags, reader, DumpSize, baseAddress);
+                }
+                switch (DumpSize)
+                {
+                    case 4:
+                        DumpHex = CaesarReader.ReadBitflagInt32(ref bitflags, reader).ToString("X");
+                        DumpDec = CaesarReader.ReadBitflagInt32(ref bitflags, reader).ToString();
+                        break;
+                    case 1:
+                        DumpHex = CaesarReader.ReadBitflagInt8(ref bitflags, reader).ToString("X");
+                        DumpDec = CaesarReader.ReadBitflagInt32(ref bitflags, reader).ToString();
+                        break;
+                    default:
+                        DumpHex = BitUtility.BytesToHex(CaesarReader.ReadBitflagDumpWithReader(ref bitflags, reader, DumpSize), true);
+                        break;
+                }
 
+            }
             SizeInBits = GetSizeInBits(reader);
             // PrintDebug();
         }
 
         // look at.. DIInternalRetrieveConstParamPreparation
         // 
-        public int GetSizeInBits(BinaryReader reader, bool verbose = true) 
+        public int GetSizeInBits(BinaryReader reader, bool verbose = true)
         {
             // if (modeConfig & 0xF00) == 0x300, the value is a const param: DIIsConstParameter
 
@@ -144,7 +161,7 @@ namespace Caesar
                     // resultBitSize = 0; // inPres + 20
                 }
             }
-            else 
+            else
             {
                 // if systemparam is -1.. load a default system type
                 if (SystemParam == -1)
@@ -226,14 +243,14 @@ namespace Caesar
                             }
                         }
                     }
-                    else 
+                    else
                     {
                         // should throw an exception?
                         //Console.WriteLine($"WARNING: Unknown or unhandled type for for {qualifier}");
                         throw new Exception($"Attempted to load an unknown system type for {Qualifier}");
                     }
                 }
-                else 
+                else
                 {
                     // not a const param, not a native param, this is a special param, parsed at DIInternalRetrieveSpecialPreparation
                     // DIInternalRetrieveSpecialPreparation officially supports 0x410, 0x420 only
@@ -373,7 +390,8 @@ namespace Caesar
             Console.WriteLine($"{nameof(Field1E)} : {Field1E}");
             Console.WriteLine($"{nameof(SystemParam)} : {SystemParam}");
             // Console.WriteLine($"{nameof(noIdea_T)} : {language.GetString(noIdea_T)}");
-            Console.WriteLine($"{nameof(Dump)} : {BitUtility.BytesToHex(Dump)}");
+            Console.WriteLine($"{nameof(DumpDec)} : {DumpDec}");
+            Console.WriteLine($"{nameof(DumpHex)} : {DumpHex}");
             Console.WriteLine("---------------");
         }
     }
